@@ -37,22 +37,12 @@ jobs:
         env:
           SOURCE_REPO: ${{ inputs.source_repo }}
         run: |
+          echo "target_repo=dtinth/docs" >> "$GITHUB_OUTPUT"
+          echo "branch=gh-pages" >> "$GITHUB_OUTPUT"
           case "$SOURCE_REPO" in
-            dtinth/deployer-docs)
-              echo "target_repo=dtinth/docs" >> "$GITHUB_OUTPUT"
-              echo "branch=gh-pages" >> "$GITHUB_OUTPUT"
-              echo "subdir=deployer-docs" >> "$GITHUB_OUTPUT"
-              ;;
-            dtinth/thdocs)
-              echo "target_repo=dtinth/docs" >> "$GITHUB_OUTPUT"
-              echo "branch=gh-pages" >> "$GITHUB_OUTPUT"
-              echo "subdir=thdocs" >> "$GITHUB_OUTPUT"
-              ;;
-            dtinth/bizdocgen)
-              echo "target_repo=dtinth/docs" >> "$GITHUB_OUTPUT"
-              echo "branch=gh-pages" >> "$GITHUB_OUTPUT"
-              echo "subdir=bizdocgen" >> "$GITHUB_OUTPUT"
-              ;;
+            dtinth/deployer-docs) echo "subdir=deployer-docs" >> "$GITHUB_OUTPUT" ;;
+            dtinth/thdocs)        echo "subdir=thdocs"        >> "$GITHUB_OUTPUT" ;;
+            dtinth/bizdocgen)     echo "subdir=bizdocgen"     >> "$GITHUB_OUTPUT" ;;
             *)
               echo "::error::No deploy target configured for source repo: $SOURCE_REPO"
               exit 1
