@@ -1,0 +1,99 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_repo:
+        description: Source repository (owner/name) that built the artifact.
+        required: true
+        type: string
+      source_run_id:
+        description: GitHub Actions run ID in the source repo that produced the artifact.
+        required: true
+        type: string
+      artifact_name:
+        description: Artifact name as uploaded in the source workflow.
+        required: true
+        type: string
+      site:
+        description: Logical site name.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write   # needed for octo-sts
+  actions: read     # needed to download artifact from source repo
+
+concurrency:
+  group: deploy-${{ inputs.site }}
+
+jobs:
+  deploy:
+    name: deploy ${{ inputs.site }} from ${{ inputs.source_repo }}@${{ inputs.source_run_id }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout deployer repo
+        uses: actions/checkout@v4
+
+      - name: Resolve site config
+        id: site
+        env:
+          SITE: ${{ inputs.site }}
+        run: |
+          case "$SITE" in
+            thdocs)
+              echo "target_repo=dtinth/docs" >> "$GITHUB_OUTPUT"
+              echo "branch=gh-pages" >> "$GITHUB_OUTPUT"
+              echo "subdir=thdocs" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "::error::Unknown site: $SITE"
+              exit 1
+              ;;
+          esac
+
+      - name: Download artifact from source repo
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: ./_artifact
+          repository: ${{ inputs.source_repo }}
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Mint write token for target repo
+        id: write-token
+        uses: octo-sts/action@main
+        with:
+          scope: ${{ steps.site.outputs.target_repo }}
+          identity: deployer-docs
+
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.site.outputs.target_repo }}
+          ref: ${{ steps.site.outputs.branch }}
+          token: ${{ steps.write-token.outputs.token }}
+          path: ./_target
+
+      - name: Update subdir and push
+        env:
+          SUBDIR: ${{ steps.site.outputs.subdir }}
+          SITE: ${{ inputs.site }}
+          SOURCE_REPO: ${{ inputs.source_repo }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: |
+          rm -rf "./_target/$SUBDIR"
+          mkdir -p "./_target/$SUBDIR"
+          cp -r ./_artifact/. "./_target/$SUBDIR/"
+          cd ./_target
+          git config user.name "dtinth-bot"
+          git config user.email "dtinth-bot@users.noreply.github.com"
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes to deploy."
+            exit 0
+          fi
+          git commit -m "deploy: $SITE from $SOURCE_REPO@$SOURCE_RUN_ID"
+          git push

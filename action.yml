@@ -1,0 +1,42 @@
+name: Deploy to docs repo
+description: Dispatches a deploy of the named site to the deployer-docs repository.
+
+inputs:
+  site:
+    description: Logical site name. Must match an entry in deployer-docs/deploy.yml.
+    required: true
+  artifact-name:
+    description: Name passed to actions/upload-artifact in this workflow.
+    required: true
+  deployer-repo:
+    description: Override the deployer repo (default dtinth/deployer-docs).
+    required: false
+    default: dtinth/deployer-docs
+
+runs:
+  using: composite
+  steps:
+    - name: Mint dispatch token via octo-sts
+      id: octo-sts
+      uses: octo-sts/action@main
+      with:
+        scope: ${{ inputs.deployer-repo }}
+        identity: dispatcher
+
+    - name: Dispatch deploy workflow
+      shell: bash
+      env:
+        GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+        DEPLOYER_REPO: ${{ inputs.deployer-repo }}
+        SOURCE_REPO: ${{ github.repository }}
+        SOURCE_RUN_ID: ${{ github.run_id }}
+        ARTIFACT_NAME: ${{ inputs.artifact-name }}
+        SITE: ${{ inputs.site }}
+      run: |
+        gh workflow run deploy.yml \
+          --repo "$DEPLOYER_REPO" \
+          --ref main \
+          -f source_repo="$SOURCE_REPO" \
+          -f source_run_id="$SOURCE_RUN_ID" \
+          -f artifact_name="$ARTIFACT_NAME" \
+          -f site="$SITE"

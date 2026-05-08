@@ -1,0 +1,9 @@
+# Grants `actions: write` on this repo so the listed source repos may invoke
+# `workflow_dispatch` on `deploy.yml`. Adding a new source repo requires:
+#   1. Adding it to the `subject_pattern` regex below.
+#   2. Adding the corresponding site -> target mapping in deploy.yml.
+
+issuer: https://token.actions.githubusercontent.com
+subject_pattern: "repo:dtinth/deployer-docs:ref:refs/heads/main"
+permissions:
+  actions: write
