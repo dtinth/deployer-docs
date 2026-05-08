@@ -38,6 +38,11 @@ jobs:
           SOURCE_REPO: ${{ inputs.source_repo }}
         run: |
           case "$SOURCE_REPO" in
+            dtinth/deployer-docs)
+              echo "target_repo=dtinth/docs" >> "$GITHUB_OUTPUT"
+              echo "branch=gh-pages" >> "$GITHUB_OUTPUT"
+              echo "subdir=deployer-docs" >> "$GITHUB_OUTPUT"
+              ;;
             dtinth/thdocs)
               echo "target_repo=dtinth/docs" >> "$GITHUB_OUTPUT"
               echo "branch=gh-pages" >> "$GITHUB_OUTPUT"
