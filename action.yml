@@ -1,10 +1,7 @@
 name: Deploy to docs repo
-description: Dispatches a deploy of the named site to the deployer-docs repository.
+description: Dispatches a deploy of an artifact to the deployer-docs repository.
 
 inputs:
-  site:
-    description: Logical site name. Must match an entry in deployer-docs/deploy.yml.
-    required: true
   artifact-name:
     description: Name passed to actions/upload-artifact in this workflow.
     required: true
@@ -31,12 +28,10 @@ runs:
         SOURCE_REPO: ${{ github.repository }}
         SOURCE_RUN_ID: ${{ github.run_id }}
         ARTIFACT_NAME: ${{ inputs.artifact-name }}
-        SITE: ${{ inputs.site }}
       run: |
         gh workflow run deploy.yml \
           --repo "$DEPLOYER_REPO" \
           --ref main \
           -f source_repo="$SOURCE_REPO" \
           -f source_run_id="$SOURCE_RUN_ID" \
-          -f artifact_name="$ARTIFACT_NAME" \
-          -f site="$SITE"
+          -f artifact_name="$ARTIFACT_NAME"

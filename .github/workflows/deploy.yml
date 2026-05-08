@@ -15,10 +15,6 @@ on:
         description: Artifact name as uploaded in the source workflow.
         required: true
         type: string
-      site:
-        description: Logical site name.
-        required: true
-        type: string
 
 permissions:
   contents: read
@@ -26,29 +22,29 @@ permissions:
   actions: read     # needed to download artifact from source repo
 
 concurrency:
-  group: deploy-${{ inputs.site }}
+  group: deploy-${{ inputs.source_repo }}
 
 jobs:
   deploy:
-    name: deploy ${{ inputs.site }} from ${{ inputs.source_repo }}@${{ inputs.source_run_id }}
+    name: deploy from ${{ inputs.source_repo }} run ${{ inputs.source_run_id }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout deployer repo
         uses: actions/checkout@v4
 
-      - name: Resolve site config
+      - name: Resolve deploy target from source repo
         id: site
         env:
-          SITE: ${{ inputs.site }}
+          SOURCE_REPO: ${{ inputs.source_repo }}
         run: |
-          case "$SITE" in
-            thdocs)
+          case "$SOURCE_REPO" in
+            dtinth/thdocs)
               echo "target_repo=dtinth/docs" >> "$GITHUB_OUTPUT"
               echo "branch=gh-pages" >> "$GITHUB_OUTPUT"
               echo "subdir=thdocs" >> "$GITHUB_OUTPUT"
               ;;
             *)
-              echo "::error::Unknown site: $SITE"
+              echo "::error::No deploy target configured for source repo: $SOURCE_REPO"
               exit 1
               ;;
           esac
@@ -80,7 +76,6 @@ jobs:
       - name: Update subdir and push
         env:
           SUBDIR: ${{ steps.site.outputs.subdir }}
-          SITE: ${{ inputs.site }}
           SOURCE_REPO: ${{ inputs.source_repo }}
           SOURCE_RUN_ID: ${{ inputs.source_run_id }}
         run: |
@@ -95,5 +90,5 @@ jobs:
             echo "No changes to deploy."
             exit 0
           fi
-          git commit -m "deploy: $SITE from https://github.com/$SOURCE_REPO/actions/runs/$SOURCE_RUN_ID"
+          git commit -m "deploy: $SUBDIR from https://github.com/$SOURCE_REPO/actions/runs/$SOURCE_RUN_ID"
           git push

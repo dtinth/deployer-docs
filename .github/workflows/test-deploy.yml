@@ -35,5 +35,4 @@ jobs:
       - name: Dispatch deploy via action.yml
         uses: ./
         with:
-          site: thdocs
           artifact-name: docs
