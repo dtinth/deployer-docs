@@ -95,5 +95,5 @@ jobs:
             echo "No changes to deploy."
             exit 0
           fi
-          git commit -m "deploy: $SITE from $SOURCE_REPO@$SOURCE_RUN_ID"
+          git commit -m "deploy: $SITE from https://github.com/$SOURCE_REPO/actions/runs/$SOURCE_RUN_ID"
           git push
