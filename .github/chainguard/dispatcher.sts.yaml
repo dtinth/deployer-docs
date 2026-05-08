@@ -4,6 +4,6 @@
 #   2. Adding the corresponding site -> target mapping in deploy.yml.
 
 issuer: https://token.actions.githubusercontent.com
-subject_pattern: "repo:dtinth/(deployer-docs|thdocs):ref:refs/heads/main"
+subject_pattern: "repo:dtinth/(bizdocgen|deployer-docs|thdocs):ref:refs/heads/(main|thdocs)"
 permissions:
   actions: write
