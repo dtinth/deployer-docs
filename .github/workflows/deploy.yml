@@ -43,6 +43,11 @@ jobs:
               echo "branch=gh-pages" >> "$GITHUB_OUTPUT"
               echo "subdir=thdocs" >> "$GITHUB_OUTPUT"
               ;;
+            dtinth/bizdocgen)
+              echo "target_repo=dtinth/docs" >> "$GITHUB_OUTPUT"
+              echo "branch=gh-pages" >> "$GITHUB_OUTPUT"
+              echo "subdir=bizdocgen" >> "$GITHUB_OUTPUT"
+              ;;
             *)
               echo "::error::No deploy target configured for source repo: $SOURCE_REPO"
               exit 1
