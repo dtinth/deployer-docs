@@ -41,6 +41,7 @@ jobs:
           echo "branch=gh-pages" >> "$GITHUB_OUTPUT"
           case "$SOURCE_REPO" in
             dtinth/deployer-docs) echo "subdir=deployer-docs" >> "$GITHUB_OUTPUT" ;;
+            dtinth/grist-kit)     echo "subdir=grist-kit"     >> "$GITHUB_OUTPUT" ;;
             dtinth/thdocs)        echo "subdir=thdocs"        >> "$GITHUB_OUTPUT" ;;
             dtinth/bizdocgen)     echo "subdir=bizdocgen"     >> "$GITHUB_OUTPUT" ;;
             *)
